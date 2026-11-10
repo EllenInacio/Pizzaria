@@ -63,6 +63,10 @@ public class SecurityConfig {
                         // Usuários e perfis: somente ADMIN
                         .requestMatchers("/usuarios/**", "/api/usuarios/**").hasRole("ADMIN")
 
+                        // Dashboard administrativo: somente ADMIN e GERENTE (apenas consulta)
+                        .requestMatchers(HttpMethod.GET, "/dashboard", "/api/dashboard/**").hasAnyRole("ADMIN", "GERENTE")
+                        .requestMatchers("/dashboard/**", "/api/dashboard/**").denyAll()
+
                         // Auditoria: somente ADMIN e GERENTE (apenas consulta)
                         .requestMatchers(HttpMethod.GET, "/auditoria").hasAnyRole("ADMIN", "GERENTE")
                         .requestMatchers("/auditoria/**").denyAll()
@@ -112,10 +116,6 @@ public class SecurityConfig {
         };
     }
 
-    /**
-     * Registra a tentativa de acesso indevido (sem dados sensíveis) e responde 403:
-     * JSON para as APIs e a página de erro para as telas.
-     */
     @Bean
     public AccessDeniedHandler accessDeniedHandler() {
         return (request, response, accessDeniedException) -> {

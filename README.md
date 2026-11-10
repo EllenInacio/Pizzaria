@@ -1,4 +1,4 @@
-# PediuPatrão 🍕
+# PediuPatrão 
 
 Sistema de pedidos de pizzaria (Java 21, Spring Boot 3.4, Spring Security, MongoDB e Thymeleaf), evoluído na Atividade Prática M1 — Parte 2 com perfis de acesso, controle de entrada e saída dos pedidos, descontos, cancelamentos e auditoria.
 
@@ -25,7 +25,15 @@ Com o ADMIN, crie os demais usuários em **Configurações → Usuários** (por 
 ./mvnw test
 ```
 
-Os testes unitários (JUnit 5 + Mockito, sem necessidade de banco) cobrem cálculo do total no servidor, transições válidas e inválidas, registro de saída, desconto (limite de 20%, exclusivo do GERENTE e antes da saída), cancelamento (justificativa, exclusivo do GERENTE e antes da saída), auditoria de clientes com valores anteriores/novos e as proteções de perfis de usuário.
+Os testes unitários (JUnit 5 + Mockito, sem necessidade de banco) cobrem os cálculos e filtros do dashboard, cálculo do total no servidor, transições válidas e inválidas, registro de saída, desconto (limite de 20%, exclusivo do GERENTE e antes da saída), cancelamento (justificativa, exclusivo do GERENTE e antes da saída), auditoria de clientes com valores anteriores/novos e as proteções de perfis de usuário.
+
+## Dashboard Administrativo
+
+Painel para ADMIN e GERENTE (menu **Dashboard**) com indicadores de vendas, gráficos, situação dos pedidos, produtos mais vendidos, filtros e atualização automática, alimentado pela API `GET /api/dashboard/*`.
+
+Documentação completa (requisitos, endpoints, decisões e evidências de testes): **[docs/DOCUMENTACAO.md](docs/DOCUMENTACAO.md)**.
+
+Para ver os gráficos com histórico fictício de 30 dias, suba uma vez com `--pediupatrao.dados-demo=true` (detalhes na documentação).
 
 ## Requisitos implementados
 
