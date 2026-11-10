@@ -43,7 +43,6 @@ public class HomeController {
     @Autowired
     private AuditoriaService auditoriaService;
 
-    // Usuário e perfil logados, disponíveis em todas as telas (sidebar e botões por perfil)
     @ModelAttribute("usuarioLogado")
     public String usuarioLogado() {
         return AuditoriaService.usuarioAtual();
@@ -241,6 +240,15 @@ public class HomeController {
             redirectAttributes.addFlashAttribute("erro", e.getMessage());
         }
         return "redirect:/clientes";
+    }
+
+    // ========================
+    // DASHBOARD ADMINISTRATIVO (ADMIN e GERENTE — os dados vêm da API /api/dashboard)
+    // ========================
+    @GetMapping("/dashboard")
+    public String dashboard(Model model) {
+        model.addAttribute("content", "dashboard :: content");
+        return "layout";
     }
 
     // ========================
