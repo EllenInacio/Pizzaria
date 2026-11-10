@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Gerenciar Produtos</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+        <link rel="stylesheet" th:href="@{/css/style.css}">
+    </head>
+    <body>
+        <!-- Sidebar incluído como fragmento -->
+        <aside>
+            <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        </aside>
+
+        <div class="container mt-5" th:fragment="content">
+            <h1 class="mb-4">Gestão de Produtos</h1>
+
+            <!-- Botão para abrir o formulário -->
+            <button class="btn btn-primary mb-3" data-bs-toggle="collapse" data-bs-target="#formularioProduto">
+                Novo Produto
+            </button>
+
+            <!-- Formulário de Cadastro -->
+            <div class="collapse" id="formularioProduto">
+                <div class="card card-body">
+                    <form id="produtoForm">
+                        <div class="mb-3">
+                            <label for="nome" class="form-label">Nome do Produto</label>
+                            <input type="text" id="nome" name="nome" class="form-control" placeholder="Nome do Produto" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="tipo" class="form-label">Tipo do Produto</label>
+                            <select id="tipo" name="tipo" class="form-select" required>
+                                <option value="" disabled selected>Selecione o Tipo</option>
+                                <option value="Pizza">Pizza</option>
+                                <option value="Lanche">Lanche</option>
+                                <option value="Bebida">Bebida</option>
+                                <option value="Porção">Porção</option>
+                                <option value="Adicional">Adicional</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="preco" class="form-label">Preço</label>
+                            <input type="number" id="preco" name="preco" class="form-control" placeholder="Preço (R$)" step="0.01" required>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input type="checkbox" id="ativo" name="ativo" class="form-check-input">
+                            <label for="ativo" class="form-check-label">Produto Ativo</label>
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-success">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Listagem de Produtos -->
+            <table class="table table-bordered table-striped mt-3">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Tipo</th>
+                        <th>Preço</th>
+                        <th>Ativo</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Loop para listar os produtos -->
+                    <tr th:each="produto : ${produtos}">
+                        <td th:text="${produto.id}"></td>
+                        <td th:text="${produto.nome}"></td>
+                        <td th:text="${produto.tipo}"></td>
+                        <td th:text="${produto.preco != null} ? ${#numbers.formatDecimal(produto.preco, 1, 'COMMA', 2, 'POINT')} : '—'"></td>
+                        <td th:text="${produto.ativo == true ? 'Sim' : 'Não'}">Sim</td>
+                        <td>
+                            <button type="button" class="btn btn-warning btn-sm btn-editar-produto"
+                                    th:data-id="${produto.id}" th:data-nome="${produto.nome}" th:data-tipo="${produto.tipo}"
+                                    th:data-preco="${produto.preco}" th:data-ativo="${produto.ativo == true}">Editar</button>
+                            <button type="button" class="btn btn-danger btn-sm btn-excluir-produto"
+                                    th:data-id="${produto.id}">Excluir</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <script>
+                // O formulário envia JSON para a API (antes enviava form-urlencoded e a API recusava)
+                const API_PRODUTOS = '/api/produtos';
+                const produtoForm = document.getElementById('produtoForm');
+
+                produtoForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const id = produtoForm.dataset.id;
+                    const produto = {
+                        nome: document.getElementById('nome').value,
+                        tipo: document.getElementById('tipo').value,
+                        preco: parseFloat(document.getElementById('preco').value),
+                        ativo: document.getElementById('ativo').checked
+                    };
+                    const response = await fetch(id ? `${API_PRODUTOS}/${encodeURIComponent(id)}` : API_PRODUTOS, {
+                        method: id ? 'PUT' : 'POST',
+                        headers: csrfHeaders({'Content-Type': 'application/json'}),
+                        body: JSON.stringify(produto)
+                    });
+                    if (response.ok) {
+                        alert('Produto salvo com sucesso!');
+                        location.reload();
+                    } else {
+                        alert(await mensagemErro(response));
+                    }
+                });
+
+                document.addEventListener('click', async (e) => {
+                    const editar = e.target.closest('.btn-editar-produto');
+                    if (editar) {
+                        // Preenche o formulário com os dados do produto para edição
+                        produtoForm.dataset.id = editar.dataset.id;
+                        document.getElementById('nome').value = editar.dataset.nome || '';
+                        document.getElementById('tipo').value = editar.dataset.tipo || '';
+                        document.getElementById('preco').value = editar.dataset.preco || '';
+                        document.getElementById('ativo').checked = editar.dataset.ativo === 'true';
+                        bootstrap.Collapse.getOrCreateInstance(document.getElementById('formularioProduto')).show();
+                        return;
+                    }
+                    const excluir = e.target.closest('.btn-excluir-produto');
+                    if (excluir && confirm('Tem certeza que deseja excluir este produto?')) {
+                        const response = await fetch(`${API_PRODUTOS}/${encodeURIComponent(excluir.dataset.id)}`, {
+                            method: 'DELETE',
+                            headers: csrfHeaders()
+                        });
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            alert(await mensagemErro(response));
+                        }
+                    }
+                });
+            </script>
+        </div>
+        <script th:src="@{/js/script.js}"></script>
+    </body>
+</html>
