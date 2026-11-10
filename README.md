@@ -1,5 +1,7 @@
 # PediuPatrão 
 
+Link do video: https://drive.google.com/drive/folders/1o6DCyqEAi9hpik0sDanfuNb7yb99oen-?usp=drive_link
+
 Sistema de pedidos de pizzaria (Java 21, Spring Boot 3.4, Spring Security, MongoDB e Thymeleaf), evoluído na Atividade Prática M1 — Parte 2 com perfis de acesso, controle de entrada e saída dos pedidos, descontos, cancelamentos e auditoria.
 
 ## Como executar
